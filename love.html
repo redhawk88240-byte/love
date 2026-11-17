@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>For Tanya</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Cormorant+Garamond:ital,wght@1,500&display=swap" rel="stylesheet">
+<style>
+:root{--night:#2b1030;--paper:#fff1f3;--ink:#4a1f3a;--rose:#d6336c;--gold:#f0c27b}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{min-height:100vh;background:radial-gradient(circle at 50% 0,#4a1a4d,var(--night) 70%);color:var(--paper);font-family:'Caveat','Segoe Script','Bradley Hand',cursive}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--gold);outline-offset:4px}
+
+#cover{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.6rem;text-align:center;padding:1.5rem;transition:opacity .8s}
+#cover.gone{opacity:0;pointer-events:none}
+#cover h1{font:italic 500 2.8rem/1.1 'Cormorant Garamond',Georgia,serif;margin:0}
+#cover p{margin:0;font-size:1.5rem;color:var(--gold)}
+.env{position:relative;width:15rem;height:10rem;border:0;padding:0;background:var(--rose);border-radius:6px;cursor:pointer;box-shadow:0 12px 30px #0006}
+.flap{position:absolute;inset:0 0 auto 0;height:62%;background:#b82a5e;clip-path:polygon(0 0,100% 0,50% 100%);transform-origin:top;transition:transform .7s}
+.seal{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:2.4rem;color:var(--gold);animation:beat 1.6s infinite}
+.open .flap{transform:rotateX(180deg)}
+.open .seal{opacity:0;animation:none}
+@keyframes beat{50%{transform:translate(-50%,-50%) scale(1.18)}}
+
+main{max-width:34rem;margin:0 auto;padding:1.5rem 1.2rem 4rem}
+.paper{background:var(--paper);color:var(--ink);padding:1.8rem 1.5rem;border-radius:3px;box-shadow:0 14px 40px #0007;font-size:1.55rem;line-height:1.5;white-space:pre-wrap;min-height:60vh}
+#after{margin-top:2.5rem;text-align:center;animation:fade 1.2s both}
+@keyframes fade{from{opacity:0}}
+.days{margin:0;font:italic 500 1.6rem 'Cormorant Garamond',Georgia,serif;color:var(--gold)}
+.strip{display:flex;gap:1.2rem;overflow-x:auto;scroll-snap-type:x mandatory;padding:1.8rem 1rem}
+.strip img{flex:0 0 70%;max-width:18rem;aspect-ratio:3/4;object-fit:cover;scroll-snap-align:center;background:#fff;padding:.6rem .6rem 2rem;box-shadow:0 8px 20px #0006}
+.strip img:nth-child(odd){transform:rotate(-2deg)}
+.strip img:nth-child(even){transform:rotate(2deg)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<section id="cover">
+  <h1 id="to">For Tanya</h1>
+  <button class="env" id="env" aria-label="Open the letter"><span class="flap"></span><span class="seal">&hearts;</span></button>
+  <p>Tap to open</p>
+</section>
+
+<main id="letter" hidden>
+  <div class="paper" id="paper"><span id="text"></span></div>
+  <div id="after" hidden>
+    <p class="days" id="days"></p>
+    <div class="strip" id="strip"></div>
+  </div>
+</main>
+
+<script>
+/* ---- Edit these ---- */
+const HER = "Tanya";
+const START = "2026-01-06"; // the day you fell in love
+const PHOTOS = ["photos/1.jpg", "photos/2.jpg", "photos/3.jpg"]; // add more names here
+
+const LETTER = `My Favourite Person ❤️
+
+You’re not just someone I love,
+You’re my little piece of heaven above.
+You’re the smile that brightens my day,
+And the one I wish would always stay.
+I may not have the perfect words to say,
+But I love you more in every little way.
+Even when we fight or things go wrong,
+In my heart, it’s you where you belong.
+If I could make one wish come true,
+I’d spend all my tomorrows with you.
+Through every laugh, every tear, every mile,
+I’d still choose you, again and again, my love.
+You’re my comfort, my happiness, my favourite view,
+And no matter what happens, I’ll keep choosing you.
+Maybe I’m not perfect, but one thing is true—
+My heart feels happiest when it’s with you.
+
+Forever yours,
+Neeraj ❤️`; 
+/* -------------------- */
+
+const $ = id => document.getElementById(id);
+$("to").textContent = "For " + HER;
+document.title = "For " + HER;
+
+$("env").onclick = () => {
+  $("env").classList.add("open");
+  setTimeout(() => $("cover").classList.add("gone"), 800);
+  setTimeout(() => { $("cover").hidden = true; $("letter").hidden = false; typeLetter(); }, 1600);
+};
+
+let shown = false;
+function showAfter() {
+  if (shown) return;
+  shown = true;
+  $("after").hidden = false;
+  const d = Math.floor((Date.now() - new Date(START)) / 864e5);
+  if (d > 0) $("days").textContent = d + " days of loving you";
+  PHOTOS.forEach(src => {
+    const im = new Image();
+    im.alt = "A photo of " + HER;
+    im.onerror = () => im.remove();
+    im.src = src;
+    $("strip").append(im);
+  });
+}
+
+function typeLetter() {
+  const el = $("text");
+  let i = 0, t;
+  const finish = () => { clearTimeout(t); el.textContent = LETTER; showAfter(); };
+  if (matchMedia("(prefers-reduced-motion:reduce)").matches) return finish();
+  $("paper").onclick = finish; // tap the letter to skip the typing
+  (function step() {
+    if (i >= LETTER.length) return showAfter();
+    el.textContent = LETTER.slice(0, ++i);
+    t = setTimeout(step, /[.,\n]/.test(LETTER[i - 1]) ? 220 : 32);
+  })();
+}
+</script>
+</body>
+</html>
